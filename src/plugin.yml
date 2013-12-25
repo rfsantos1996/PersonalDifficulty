@@ -1,0 +1,16 @@
+name: PersonalDifficulty
+version: 0.1
+author: rfsantos1996
+main: com.jabyftw.pd.PDifficulty
+description: Personal difficulty for your players
+commands:
+   difficulty:
+     description: Main command
+     usage: Use /difficulty (0- peaceful, 1- easy, 2- normal, 3- hard)
+permissions:
+   pd.change:
+     description: this will allow you to use the command
+     default: true
+   pd.changeToEasier:
+     description: this will allow you to change to a easier difficulty
+     default: op
