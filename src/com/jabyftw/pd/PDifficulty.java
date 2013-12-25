@@ -27,10 +27,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor {
 
     private MySQL sql;
-    private final FileConfiguration config = getConfig();
+    private FileConfiguration config;
     int defaultDif, cooldownTime;
     private double hardM, normalM, easyM, peacefulM;
-    private List<String> cooldown = new ArrayList();
+    private List<Player> cooldown = new ArrayList();
     private Map<Player, Integer> difficulty = new HashMap();
     /*
      0 - peaceful: no PVP, no targeting + down
@@ -41,6 +41,7 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
 
     @Override
     public void onEnable() {
+        config = getConfig();
         config.addDefault("config.defaultDifficulty", 2);
         config.addDefault("config.changeCooldownInMinutes", 30);
         config.addDefault("config.peacefulDamageMultiplier", 0.5);
@@ -59,7 +60,7 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
         config.options().copyDefaults(true);
         saveConfig();
         reloadConfig();
-        defaultDif = config.getInt("config.changeCooldownInMinutes") * 60 * 20;
+        defaultDif = config.getInt("config.changeCooldownInMinutes");
         cooldownTime = config.getInt("config.defaultDifficulty");
         hardM = config.getDouble("config.hardDamageMultiplier");
         normalM = config.getDouble("config.normalDamageMultiplier");
@@ -140,7 +141,7 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
             if (sender.hasPermission("pd.change")) {
                 Player p = (Player) sender;
                 if (args.length > 0) {
-                    if (!cooldown.contains(p.getName().toLowerCase())) {
+                    if (!cooldown.contains(p)) {
                         try {
                             int dif = Integer.parseInt(args[0]);
                             int atual = difficulty.get(p);
@@ -155,8 +156,8 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
                                     } else if (dif != defaultDif) {
                                         sql.updateDifficulty(p.getName().toLowerCase(), dif);
                                     }
-                                    cooldown.add(p.getName().toLowerCase());
-                                    removeCooldown(p.getName());
+                                    cooldown.add(p);
+                                    removeCooldown(p);
                                     p.sendMessage(getLang("difficultyChanged").replaceAll("%diff", getDifficulty(dif)));
                                     return true;
                                 } else {
@@ -170,8 +171,8 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
                                 } else if (dif != defaultDif) {
                                     sql.updateDifficulty(p.getName().toLowerCase(), dif);
                                 }
-                                cooldown.add(p.getName().toLowerCase());
-                                removeCooldown(p.getName());
+                                cooldown.add(p);
+                                removeCooldown(p);
                                 p.sendMessage(getLang("difficultyChanged").replaceAll("%diff", getDifficulty(dif)));
                                 return true;
                             }
@@ -212,16 +213,16 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
         }
     }
 
-    private void removeCooldown(String name) {
-        final String name2 = name.toLowerCase();
+    private void removeCooldown(Player p) {
+        final Player p2 = p;
         getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 
             @Override
             public void run() {
-                if (cooldown.contains(name2)) {
-                    cooldown.remove(name2);
+                if (cooldown.contains(p2)) {
+                    cooldown.remove(p2);
                 }
             }
-        }, cooldownTime);
+        }, ((cooldownTime * 60) * 20)); // minutes * seconds * ticks
     }
 }
