@@ -10,6 +10,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -91,15 +92,6 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
         if (e.getEntity() instanceof Player) {
             Player p = (Player) e.getEntity();
             int dif = difficulty.get(p);
-            if (dif == 3) {
-                e.setDamage(e.getDamage() * 1.5); // 1.5% more damage
-            } else if (dif == 2) {
-                e.setDamage(e.getDamage() * 1.0); // same damage as the server
-            } else if (dif == 1) {
-                e.setDamage(e.getDamage() * 0.75); // 75% dmg
-            } else if (dif == 0) {
-                e.setDamage(e.getDamage() * 0.50); // half damage
-            }
             if (dif < 3) { // normal
                 if (e.getCause().equals(DamageCause.STARVATION)) {
                     e.setCancelled(true);
@@ -109,6 +101,26 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
                 if (e.getCause().equals(DamageCause.FALL) || e.getCause().equals(DamageCause.LAVA)) {
                     e.setCancelled(true);
                 }
+            }
+            if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+                EntityDamageByEntityEvent ev = (EntityDamageByEntityEvent) p.getLastDamageCause();
+                if (ev.getDamager() instanceof Player) {
+                    return;
+                } else if (ev.getDamager() instanceof Projectile) {
+                    Projectile proj = (Projectile) ev.getDamager();
+                    if (proj.getShooter() instanceof Player) {
+                        return;
+                    }
+                }
+            }
+            if (dif == 3) {
+                e.setDamage(e.getDamage() * 1.5); // 1.5% more damage
+            } else if (dif == 2) {
+                e.setDamage(e.getDamage() * 1.0); // same damage as the server
+            } else if (dif == 1) {
+                e.setDamage(e.getDamage() * 0.75); // 75% dmg
+            } else if (dif == 0) {
+                e.setDamage(e.getDamage() * 0.50); // half damage
             }
         }
     }
