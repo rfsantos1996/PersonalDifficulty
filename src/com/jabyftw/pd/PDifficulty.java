@@ -72,6 +72,10 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
         normalM = config.getDouble("config.normalDamageMultiplier");
         easyM = config.getDouble("config.easyDamageMultiplier");
         peacefulM = config.getDouble("config.peacefulDamageMultiplier");
+        hardD = config.getDouble("config.hardDamageDealtMultiplier");
+        normalD = config.getDouble("config.normalDamageDealtMultiplier");
+        easyD = config.getDouble("config.easyDamageDealtMultiplier");
+        peacefulD = config.getDouble("config.peacefulDamageDealtMultiplier");
         sql = new MySQL(this, config.getString("config.MySQL.username"), config.getString("config.MySQL.password"), config.getString("config.MySQL.url"));
         sql.createTable();
         getLogger().log(Level.INFO, "Loaded configuration.");
