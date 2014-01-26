@@ -31,6 +31,7 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
     private FileConfiguration config;
     int defaultDif, cooldownTime;
     private double hardM, normalM, easyM, peacefulM;
+    private double hardD, normalD, easyD, peacefulD;
     private List<Player> cooldown = new ArrayList();
     private Map<Player, Integer> difficulty = new HashMap();
     /*
@@ -46,9 +47,13 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
         config.addDefault("config.defaultDifficulty", 2);
         config.addDefault("config.changeCooldownInMinutes", 30);
         config.addDefault("config.peacefulDamageMultiplier", 0.5);
+        config.addDefault("config.peacefulDamageDealtMultiplier", 1.0);
         config.addDefault("config.easyDamageMultiplier", 0.75);
+        config.addDefault("config.easyDamageDealtMultiplier", 1.0);
         config.addDefault("config.normalDamageMultiplier", 1.0);
+        config.addDefault("config.normalDamageDealtMultiplier", 1.0);
         config.addDefault("config.hardDamageMultiplier", 1.5);
+        config.addDefault("config.hardDamageDealtMultiplier", 0.75);
         config.addDefault("config.MySQL.username", "root");
         config.addDefault("config.MySQL.password", "pass");
         config.addDefault("config.MySQL.url", "jdbc:mysql://localhost:3306/database");
@@ -113,14 +118,21 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
                     }
                 }
             }
-            if (dif == 3) {
-                e.setDamage(e.getDamage() * 1.5); // 1.5% more damage
-            } else if (dif == 2) {
-                e.setDamage(e.getDamage() * 1.0); // same damage as the server
-            } else if (dif == 1) {
-                e.setDamage(e.getDamage() * 0.75); // 75% dmg
-            } else if (dif == 0) {
-                e.setDamage(e.getDamage() * 0.50); // half damage
+            switch (dif) {
+                case 3:
+                    e.setDamage(e.getDamage() * hardM); // 1.5% more damage
+                    break;
+                case 2:
+                    e.setDamage(e.getDamage() * normalM); // same damage as the server
+                    break;
+                case 1:
+                    e.setDamage(e.getDamage() * easyM); // 75% dmg
+                    break;
+                case 0:
+                    e.setDamage(e.getDamage() * peacefulM); // half damage
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -142,6 +154,25 @@ public class PDifficulty extends JavaPlugin implements Listener, CommandExecutor
             if (e.getEntity() instanceof Player) {
                 if (difficulty.get(((Player) e.getEntity())) < 1 || difficulty.get(((Player) e.getDamager())) < 1) {
                     e.setCancelled(true);
+                }
+            } else {
+                Player p = (Player) e.getDamager();
+                int dif = difficulty.get(p);
+                switch (dif) {
+                    case 3:
+                        e.setDamage(e.getDamage() * hardD);
+                        break;
+                    case 2:
+                        e.setDamage(e.getDamage() * normalD);
+                        break;
+                    case 1:
+                        e.setDamage(e.getDamage() * easyD);
+                        break;
+                    case 0:
+                        e.setDamage(e.getDamage() * peacefulD);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
